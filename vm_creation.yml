@@ -1,0 +1,36 @@
+---
+- name: Create VMs on vSphere 7
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Create VMs
+      vmware_guest:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: no
+        folder: "/{{ datacenter_name }}/vm/{{ folder }}"
+        name: "{{ item.name }}"
+        state: poweredon
+        datacenter: "{{ datacenter_name }}"
+        cluster: "{{ cluster_name }}"
+        resource_pool: "{{ resource_pool }}"
+        datastore: "{{ datastore_name }}"
+        guest_id: ubuntu64Guest
+        hardware:
+          memory_mb: 12288
+          num_cpus: 2
+          scsi: paravirtual
+        disk:
+          - size_gb: 50
+            type: thin
+            datastore: "{{ datastore_name }}"
+        networks:
+          - name: "{{ network_name }}"
+            device_type: vmxnet3
+            wait_for_ip_address: yes
+      loop:
+        - name: masterk8s
+        - name: worker1-k8s
+        - name: worker2-k8s
+...
